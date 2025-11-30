@@ -33,9 +33,9 @@ export const syncUser = async (req: Request, res: Response) => {
 
     // Crear nuevo usuario
     await pool.query(
-      `INSERT INTO users (id, firebase_uid, first_name, last_name, email, birth_date) 
-       VALUES (UUID(), ?, ?, ?, ?, ?)`,
-      [firebase_uid, first_name, last_name, email, birth_date]
+      `INSERT INTO users (id, firebase_uid, first_name, last_name, email, birth_date, avatar_url) 
+       VALUES (UUID(), ?, ?, ?, ?, ?, ?)`,
+      [firebase_uid, first_name, last_name, email, birth_date, 'avatar1']
     );
 
     // Obtener el usuario recién creado
@@ -72,6 +72,8 @@ export const getUserProfile = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    console.log('👤 Usuario obtenido de DB:', users[0]);
+
     res.json({
       success: true,
       user: users[0],
@@ -88,7 +90,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
     const { uid } = req.params;
     const { first_name, last_name, email, birth_date, avatar_url } = req.body;
 
-    // Validación básica
     if (!first_name || !last_name || !email || !birth_date) {
       return res.status(400).json({
         success: false,
@@ -96,12 +97,16 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       });
     }
 
-    // Construir query dinámicamente
+    // 🔥 FIX: Convertir "1993-11-15T05:00:00.000Z" → "1993-11-15"
+    const formattedBirthDate = birth_date.includes('T')
+      ? birth_date.split('T')[0]
+      : birth_date;
+
     const updates: string[] = [];
     const values: any[] = [];
 
     updates.push('first_name = ?', 'last_name = ?', 'email = ?', 'birth_date = ?');
-    values.push(first_name, last_name, email, birth_date);
+    values.push(first_name, last_name, email, formattedBirthDate);
 
     if (avatar_url !== undefined) {
       updates.push('avatar_url = ?');
@@ -110,7 +115,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 
     values.push(uid);
 
-    // Actualizar usuario
     const [result] = await pool.query<ResultSetHeader>(
       `UPDATE users SET ${updates.join(', ')} WHERE firebase_uid = ?`,
       values
@@ -123,7 +127,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       });
     }
 
-    // Obtener usuario actualizado
     const [users] = await pool.query<RowDataPacket[]>(
       'SELECT * FROM users WHERE firebase_uid = ?',
       [uid]
@@ -136,8 +139,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error al actualizar perfil:', error);
-    
-    // Manejar email duplicado
+
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         success: false,
@@ -148,6 +150,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Error del servidor' });
   }
 };
+
 
 // Actualizar estadísticas del usuario
 export const updateUserStats = async (req: Request, res: Response) => {
