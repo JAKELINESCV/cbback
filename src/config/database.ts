@@ -88,7 +88,7 @@ export const createTables = async () => {
       )
     `);
 
-    // Tabla scores (registro detallado de cada pregunta)
+    // Tabla scores 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS scores (
         id INT AUTO_INCREMENT PRIMARY KEY,

@@ -10,10 +10,7 @@ import {
 
 const router = Router();
 
-// Rutas estáticas primero
 router.get('/ranking/top', getUserRanking);
-
-// Luego rutas dinámicas
 router.post('/sync', syncUser);
 router.get('/:uid', getUserProfile);
 router.put('/:uid', updateUserProfile);

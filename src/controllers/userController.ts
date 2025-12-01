@@ -97,7 +97,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       });
     }
 
-    // 🔥 FIX: Convertir "1993-11-15T05:00:00.000Z" → "1993-11-15"
     const formattedBirthDate = birth_date.includes('T')
       ? birth_date.split('T')[0]
       : birth_date;

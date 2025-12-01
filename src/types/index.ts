@@ -1,6 +1,5 @@
 import { Request } from 'express';
 
-// Tipos para las entidades
 export interface User {
   id: string;
   firebase_uid: string;
@@ -53,7 +52,6 @@ export interface Score {
   answered_at: Date;
 }
 
-// Request con usuario autenticado
 export interface AuthRequest extends Request {
   user?: {
     uid: string;
@@ -61,5 +59,4 @@ export interface AuthRequest extends Request {
   };
 }
 
-// Exportar todo como default también
 export default{};
